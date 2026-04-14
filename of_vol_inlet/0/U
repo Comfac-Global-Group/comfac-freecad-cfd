@@ -1,0 +1,48 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  VELOCITY FIELD — demonstrates flowRateInletVelocity (volumetric inlet)
+
+  KEY CONCEPT:
+    type flowRateInletVelocity   <- accepts Q (m³/s), NOT a fixed velocity
+    volumetricFlowRate 0.001     <- 1 L/s = 3.6 m³/hr
+
+  This is how you give OpenFOAM volumetric inlet data.
+  CfdOF may generate "fixedValue" by default — you override it here.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+
+dimensions      [0 1 -1 0 0 0 0];   // m/s
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    inlet
+    {
+        // ---- VOLUMETRIC INLET ----------------------------------------
+        // OpenFOAM computes velocity = Q / A automatically.
+        // Change volumetricFlowRate to your actual flow in m³/s.
+        // To convert: 1 m³/hr = 1/3600 = 2.778e-4 m³/s
+        //             1 L/min = 1/60000 = 1.667e-5 m³/s
+        type                flowRateInletVelocity;
+        volumetricFlowRate  0.001;          // 1 L/s
+        // Optional: ramp from 0 to full flow over time (uncomment for transient)
+        // volumetricFlowRate  table ((0 0)(1 0.001));
+        value               uniform (0 0 0); // initial guess
+    }
+
+    outlet
+    {
+        type            zeroGradient;
+    }
+
+    walls
+    {
+        type            noSlip;
+    }
+}
